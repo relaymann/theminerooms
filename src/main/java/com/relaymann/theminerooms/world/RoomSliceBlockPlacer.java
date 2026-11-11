@@ -20,7 +20,7 @@ public final class RoomSliceBlockPlacer {
     public static final int ROOM_HEIGHT = 8;
     public static final int DOORWAY_WIDTH = 3;
     public static final int DOORWAY_HEIGHT = 3;
-    private static final int DOORWAY_START = (16 - DOORWAY_WIDTH) / 2;
+    private static final int DOORWAY_START = (32 - DOORWAY_WIDTH) / 2;
 
     private RoomSliceBlockPlacer() {
     }
@@ -97,12 +97,14 @@ public final class RoomSliceBlockPlacer {
             return false;
         }
 
+        int roomLocalX = slice.localChunkX() * 16 + x;
+        int roomLocalZ = slice.localChunkZ() * 16 + z;
         for (RoomOpening opening : slice.openings()) {
             boolean insideDoorway = switch (opening.direction()) {
-                case NORTH -> z == 0 && isCentered(x);
-                case EAST -> x == 15 && isCentered(z);
-                case SOUTH -> z == 15 && isCentered(x);
-                case WEST -> x == 0 && isCentered(z);
+                case NORTH -> z == 0 && isCentered(roomLocalX);
+                case EAST -> x == 15 && isCentered(roomLocalZ);
+                case SOUTH -> z == 15 && isCentered(roomLocalX);
+                case WEST -> x == 0 && isCentered(roomLocalZ);
             };
             if (insideDoorway) {
                 return true;
