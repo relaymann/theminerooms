@@ -58,6 +58,17 @@ class RoomSliceBlockPlacerTest {
         assertTrue(RoomSliceBlockPlacer.isRoomBoundaryPosition(southEast, 8, 15));
     }
 
+    @Test
+    void rejectsChunkCoordinatesWhoseBlockPositionsWouldOverflow() {
+        assertTrue(RoomSliceBlockPlacer.isBlockRangeRepresentable(
+                (long) Integer.MAX_VALUE / 16 * 16,
+                (long) Integer.MIN_VALUE / 16 * 16));
+        assertFalse(RoomSliceBlockPlacer.isBlockRangeRepresentable(
+                ((long) Integer.MAX_VALUE / 16 + 1) * 16, 0));
+        assertFalse(RoomSliceBlockPlacer.isBlockRangeRepresentable(
+                0, ((long) Integer.MAX_VALUE / 16 + 1) * 16));
+    }
+
     private static RoomChunkSlice slice(int chunkX, int chunkZ, RoomDirection direction) {
         return new RoomChunkSlice(
                 "test-room",
