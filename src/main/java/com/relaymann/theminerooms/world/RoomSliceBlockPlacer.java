@@ -77,7 +77,7 @@ public final class RoomSliceBlockPlacer {
                 }
 
                 for (int localY = 1; localY < ROOM_HEIGHT - 1; localY++) {
-                    if (isDoorway(slice, localX, localY, localZ)) {
+                    if (isDoorwayPosition(slice, localX, localY, localZ)) {
                         continue;
                     }
                     cursor.set(baseX + localX, floorY + localY, baseZ + localZ);
@@ -92,7 +92,7 @@ public final class RoomSliceBlockPlacer {
         return x == 0 || x == 15 || z == 0 || z == 15;
     }
 
-    private static boolean isDoorway(RoomChunkSlice slice, int x, int y, int z) {
+    static boolean isDoorwayPosition(RoomChunkSlice slice, int x, int y, int z) {
         if (y < 1 || y > DOORWAY_HEIGHT) {
             return false;
         }
