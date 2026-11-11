@@ -23,7 +23,7 @@ public final class LevelDataValidator {
   for (LevelConnection c : list) {
    if (!ids.add(c.id())) issues.add(level.id() + " duplicate connection id: " + c.id());
    if (c.kind() != expected) issues.add(level.id() + " connection " + c.id() + " has incorrect kind");
-   if (!known.contains(c.targetLevelId())) issues.add(level.id() + " connection " + c.id() + " targets unknown level: " + c.targetLevelId());
+   if (c.targetType() == ConnectionTargetType.LEVEL && !known.contains(c.targetId())) issues.add(level.id() + " connection " + c.id() + " targets unknown level: " + c.targetId());
    source(level.id() + " connection " + c.id(), c.sourceUrl(), issues);
   }
  }

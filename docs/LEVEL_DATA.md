@@ -1,6 +1,6 @@
 # Level and connection data
 
-The Java records in `level/` are the initial typed API. The JSON below is illustrative, not shipped lore content.
+The Java records in `level/` are the typed API. The JSON below is illustrative, not shipped lore content.
 
 ## Level fields
 
@@ -15,12 +15,15 @@ The Java records in `level/` are the initial typed API. The JSON below is illust
 
 - `id`: unique within the level.
 - `kind`: `ENTRANCE` or `EXIT`.
-- `targetLevelId`: documented origin or destination identifier.
+- `targetType`: `LEVEL`, `REALITY`, or `NON_LEVEL_LOCATION`; not every entrance/exit connects two levels.
+- `targetId`: stable ID for the destination endpoint.
 - `discoveryMethod`: natural, environmental clue, puzzle, lore clue, or conditional.
-- `rarity`: qualitative implementation weight; use `UNKNOWN` when source does not support a rarity claim.
+- `rarity`: qualitative implementation weight; use `UNKNOWN` when the source does not support a rarity claim.
 - `conditions`: concise source-backed conditions.
-- `sourceUrl`: individual page supporting this transition.
+- `sourceUrl`: individual page supporting this specific transition.
 - `sourceNotes`: page section/review notes, not unsourced assumptions.
+
+The validator checks that `LEVEL` endpoints exist in the catalog, but allows explicitly typed non-level endpoints such as reality or another documented location.
 
 ## Example (illustrative only)
 
@@ -30,8 +33,8 @@ The Java records in `level/` are the initial typed API. The JSON below is illust
   "displayName": "Example Level",
   "category": "numbered",
   "sourceUrl": "https://backrooms.fandom.com/wiki/Example_Level",
-  "entrances": [{"id":"entry_example","kind":"ENTRANCE","targetLevelId":"documented_origin","discoveryMethod":"NATURAL","rarity":"UNKNOWN","conditions":"Replace with source-backed condition.","sourceUrl":"https://backrooms.fandom.com/wiki/Example_Level","sourceNotes":"Add section and review notes."}],
-  "exits": [{"id":"exit_example","kind":"EXIT","targetLevelId":"documented_destination","discoveryMethod":"CONDITIONAL","rarity":"UNKNOWN","conditions":"Replace with source-backed condition.","sourceUrl":"https://backrooms.fandom.com/wiki/Example_Level","sourceNotes":"Add section and review notes."}]
+  "entrances": [{"id":"entry_example","kind":"ENTRANCE","targetType":"REALITY","targetId":"reality","discoveryMethod":"NATURAL","rarity":"UNKNOWN","conditions":"Replace with source-backed condition.","sourceUrl":"https://backrooms.fandom.com/wiki/Example_Level","sourceNotes":"Add section and review notes."}],
+  "exits": [{"id":"exit_example","kind":"EXIT","targetType":"LEVEL","targetId":"documented_destination","discoveryMethod":"CONDITIONAL","rarity":"UNKNOWN","conditions":"Replace with source-backed condition.","sourceUrl":"https://backrooms.fandom.com/wiki/Example_Level","sourceNotes":"Add section and review notes."}]
 }
 ```
 

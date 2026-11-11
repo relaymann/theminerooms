@@ -4,18 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 class LevelDataValidatorTest {
- private static final String SOURCE = "https://backrooms.fandom.com/wiki/Level_0";
- @Test void acceptsSourcedLevelWithOneEntranceAndExit() {
-  LevelDefinition zero = new LevelDefinition("level_0", "Level 0", "numbered", SOURCE, List.of(connection("entry", ConnectionKind.ENTRANCE, "level_1")), List.of(connection("exit", ConnectionKind.EXIT, "level_1")));
-  LevelDefinition one = new LevelDefinition("level_1", "Level 1", "numbered", "https://backrooms.fandom.com/wiki/Level_1", List.of(connection("entry", ConnectionKind.ENTRANCE, "level_0")), List.of(connection("exit", ConnectionKind.EXIT, "level_0")));
-  assertTrue(LevelDataValidator.validate(List.of(zero, one)).isEmpty());
+ private static final String SOURCE_A = "https://backrooms.fandom.com/wiki/Test_Fixture_A";
+ @Test void acceptsLevelAndRealityEndpointsWithOneEntranceAndExit() {
+  LevelDefinition a = new LevelDefinition("fixture_a", "Fixture A", "test", SOURCE_A,
+   List.of(connection("entry_from_reality", ConnectionKind.ENTRANCE, ConnectionTargetType.REALITY, "reality")),
+   List.of(connection("exit_to_b", ConnectionKind.EXIT, ConnectionTargetType.LEVEL, "fixture_b")));
+  LevelDefinition b = new LevelDefinition("fixture_b", "Fixture B", "test", "https://backrooms.fandom.com/wiki/Test_Fixture_B",
+   List.of(connection("entry_from_a", ConnectionKind.ENTRANCE, ConnectionTargetType.LEVEL, "fixture_a")),
+   List.of(connection("exit_to_location", ConnectionKind.EXIT, ConnectionTargetType.NON_LEVEL_LOCATION, "safe_location")));
+  assertTrue(LevelDataValidator.validate(List.of(a, b)).isEmpty());
  }
- @Test void rejectsMissingConnectionsAndUnknownTargets() {
-  LevelDefinition draft = new LevelDefinition("level_draft", "Draft", "draft", SOURCE, List.of(), List.of(connection("exit", ConnectionKind.EXIT, "missing_level")));
+ @Test void rejectsMissingConnectionsAndUnknownLevelTargets() {
+  LevelDefinition draft = new LevelDefinition("fixture_draft", "Draft", "test", SOURCE_A, List.of(),
+   List.of(connection("exit", ConnectionKind.EXIT, ConnectionTargetType.LEVEL, "missing_level")));
   List<String> issues = LevelDataValidator.validate(List.of(draft));
-  assertEquals(2, issues.size()); assertTrue(issues.stream().anyMatch(s -> s.contains("one or two"))); assertTrue(issues.stream().anyMatch(s -> s.contains("unknown level")));
+  assertEquals(2, issues.size());
+  assertTrue(issues.stream().anyMatch(s -> s.contains("one or two")));
+  assertTrue(issues.stream().anyMatch(s -> s.contains("unknown level")));
  }
- private static LevelConnection connection(String id, ConnectionKind kind, String target) {
-  return new LevelConnection(id, kind, target, DiscoveryMethod.NATURAL, ConnectionRarity.UNKNOWN, "Test-only condition; replace with reviewed source wording.", SOURCE, "Test fixture only; not shipped lore data.");
+ private static LevelConnection connection(String id, ConnectionKind kind, ConnectionTargetType targetType, String targetId) {
+  return new LevelConnection(id, kind, targetType, targetId, DiscoveryMethod.NATURAL, ConnectionRarity.UNKNOWN,
+   "Test-only condition; replace with reviewed source wording.", SOURCE_A, "Test fixture only; not shipped lore data.");
  }
 }
