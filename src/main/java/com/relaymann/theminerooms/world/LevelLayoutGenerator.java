@@ -53,7 +53,37 @@ public final class LevelLayoutGenerator {
         }
 
         addLoops(random, config.maxExtraConnections(), occupied, connections);
+        classifyRoomRoles(rooms, connections);
         return new LevelLayout(seed, config.width(), config.depth(), rooms, connections);
+    }
+
+    /**
+     * Assigns topology roles only after optional loops have been added, so the
+     * classification reflects the final graph rather than an intermediate tree.
+     */
+    private static void classifyRoomRoles(List<RoomNode> rooms, List<RoomConnection> connections) {
+        Map<String, Integer> degreeByRoom = new HashMap<>();
+        for (RoomNode room : rooms) {
+            degreeByRoom.put(room.id(), 0);
+        }
+        for (RoomConnection connection : connections) {
+            degreeByRoom.compute(connection.fromRoomId(), (id, degree) -> degree + 1);
+            degreeByRoom.compute(connection.toRoomId(), (id, degree) -> degree + 1);
+        }
+
+        for (int index = 0; index < rooms.size(); index++) {
+            RoomNode room = rooms.get(index);
+            if (room.type() == RoomType.START) {
+                continue;
+            }
+            int degree = degreeByRoom.get(room.id());
+            RoomType role = switch (degree) {
+                case 0, 1 -> RoomType.DEAD_END;
+                case 2 -> RoomType.CORRIDOR;
+                default -> RoomType.JUNCTION;
+            };
+            rooms.set(index, createRoom(room.position(), role));
+        }
     }
 
     private static RoomNode createRoom(GridPosition position, RoomType type) {
