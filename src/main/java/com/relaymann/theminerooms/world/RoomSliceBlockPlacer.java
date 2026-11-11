@@ -72,7 +72,7 @@ public final class RoomSliceBlockPlacer {
                 cursor.set(baseX + localX, ceilingY, baseZ + localZ);
                 level.setBlock(cursor, ceilingState, 2);
 
-                if (!isPerimeter(localX, localZ)) {
+                if (!isRoomBoundaryPosition(slice, localX, localZ)) {
                     continue;
                 }
 
@@ -88,8 +88,11 @@ public final class RoomSliceBlockPlacer {
         return true;
     }
 
-    private static boolean isPerimeter(int x, int z) {
-        return x == 0 || x == 15 || z == 0 || z == 15;
+    static boolean isRoomBoundaryPosition(RoomChunkSlice slice, int x, int z) {
+        return (slice.localChunkZ() == 0 && z == 0)
+                || (slice.localChunkX() == 1 && x == 15)
+                || (slice.localChunkZ() == 1 && z == 15)
+                || (slice.localChunkX() == 0 && x == 0);
     }
 
     static boolean isDoorwayPosition(RoomChunkSlice slice, int x, int y, int z) {
