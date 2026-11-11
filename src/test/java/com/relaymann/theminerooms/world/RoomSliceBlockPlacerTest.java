@@ -42,6 +42,22 @@ class RoomSliceBlockPlacerTest {
         assertFalse(RoomSliceBlockPlacer.isDoorwayPosition(west, 0, 2, 1));
     }
 
+    @Test
+    void doesNotBuildWallsOnInternalChunkSeams() {
+        RoomChunkSlice northWest = slice(0, 0, RoomDirection.NORTH);
+        RoomChunkSlice northEast = slice(1, 0, RoomDirection.NORTH);
+        RoomChunkSlice southWest = slice(0, 1, RoomDirection.SOUTH);
+        RoomChunkSlice southEast = slice(1, 1, RoomDirection.SOUTH);
+
+        assertFalse(RoomSliceBlockPlacer.isRoomBoundaryPosition(northWest, 15, 8));
+        assertFalse(RoomSliceBlockPlacer.isRoomBoundaryPosition(northWest, 8, 15));
+        assertFalse(RoomSliceBlockPlacer.isRoomBoundaryPosition(northEast, 0, 8));
+        assertFalse(RoomSliceBlockPlacer.isRoomBoundaryPosition(southWest, 15, 8));
+        assertFalse(RoomSliceBlockPlacer.isRoomBoundaryPosition(southEast, 0, 8));
+        assertTrue(RoomSliceBlockPlacer.isRoomBoundaryPosition(northWest, 8, 0));
+        assertTrue(RoomSliceBlockPlacer.isRoomBoundaryPosition(southEast, 8, 15));
+    }
+
     private static RoomChunkSlice slice(int chunkX, int chunkZ, RoomDirection direction) {
         return new RoomChunkSlice(
                 "test-room",
