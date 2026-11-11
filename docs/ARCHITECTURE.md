@@ -7,7 +7,7 @@ Separate data/catalog, world integration, gameplay systems, and client presentat
 ## Planned modules
 
 - **level** — immutable metadata, sourced connections, catalog, validation.
-- **world** — dimension data, level-specific chunk generation, structures, transitions.
+- **world** — deterministic room topology, dimension data, level-specific chunk generation, structures, transitions.
 - **entity** — entity types, sensors, navigation, behavior goals.
 - **psychology** — server-authoritative sanity/fear state; clients render synchronized snapshots.
 - **survival** — items, resources, hazards, status effects.
@@ -25,13 +25,11 @@ Every released level must pass `LevelDataValidator`: one or two sourced entrance
 
 ## World generation
 
-1. Authored landmarks preserve recognizable layouts.
-2. Procedural room/corridor graph assembly creates variation.
-3. Connectivity validation ensures generated paths are navigable.
-4. Transition points are placed only for documented connections.
-5. Seeds and generation version are stored for reproducibility.
+The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. It uses a randomized frontier to create a spanning backbone, then adds optional adjacent loops. Identical seed/config pairs produce identical layouts.
 
-Keep generation bounded and chunk-local. Avoid whole-level synchronous generation and unbounded structure searches.
+This layer is intentionally independent of Minecraft blocks and chunks. The next integration layer will map room nodes to authored templates or procedural room palettes and realize only the chunks requested by Minecraft. Documented transitions are attached later from validated level connection data; the topology generator never invents lore entrances or exits.
+
+Generation limits are enforced before allocation (maximum 128 cells per side and 4,096 grid cells). Avoid whole-level synchronous block generation, distant-chunk searches, and unbounded structure scans.
 
 ## Persistence
 

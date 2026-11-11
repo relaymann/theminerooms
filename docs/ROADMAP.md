@@ -12,8 +12,10 @@ This is a staged plan, not a claim that features are already implemented.
 - [ ] Add reviewed, source-backed initial level records.
 
 ## World and transitions
+- [x] Deterministic bounded room-topology generator (pure Java graph layer).
+- [ ] Authored landmark template placement.
 - [ ] Data-driven dimension and level bootstrap.
-- [ ] Hybrid room graph and chunk generation.
+- [ ] Chunk-local room and corridor realization.
 - [ ] Transition placement from validated connection data.
 - [ ] Safe multiplayer-aware level transfer.
 
