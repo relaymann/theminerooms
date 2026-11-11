@@ -93,28 +93,25 @@ public final class RoomSliceBlockPlacer {
     }
 
     private static boolean isDoorway(RoomChunkSlice slice, int x, int y, int z) {
-        if (y > DOORWAY_HEIGHT) {
-            return false;
-        }
-
-        boolean centeredOnEdge = x >= DOORWAY_START && x < DOORWAY_START + DOORWAY_WIDTH
-                && z >= DOORWAY_START && z < DOORWAY_START + DOORWAY_WIDTH;
-
-        if (!centeredOnEdge) {
+        if (y < 1 || y > DOORWAY_HEIGHT) {
             return false;
         }
 
         for (RoomOpening opening : slice.openings()) {
-            boolean onOpeningEdge = switch (opening.direction()) {
-                case NORTH -> z == 0;
-                case EAST -> x == 15;
-                case SOUTH -> z == 15;
-                case WEST -> x == 0;
+            boolean insideDoorway = switch (opening.direction()) {
+                case NORTH -> z == 0 && isCentered(x);
+                case EAST -> x == 15 && isCentered(z);
+                case SOUTH -> z == 15 && isCentered(x);
+                case WEST -> x == 0 && isCentered(z);
             };
-            if (onOpeningEdge) {
+            if (insideDoorway) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isCentered(int coordinate) {
+        return coordinate >= DOORWAY_START && coordinate < DOORWAY_START + DOORWAY_WIDTH;
     }
 }
