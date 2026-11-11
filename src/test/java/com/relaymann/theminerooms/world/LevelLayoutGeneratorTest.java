@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,32 @@ class LevelLayoutGeneratorTest {
             assertTrue(room.position().z() >= 0 && room.position().z() < layout.depth());
             assertTrue(ids.add(room.id()));
             assertTrue(positions.add(room.position()));
+        }
+    }
+
+    @Test
+    void classifiesRoomRolesFromTheFinalGraphIncludingLoops() {
+        LevelLayout layout = generator.generate(2026L,
+                new LevelGenerationConfig(12, 12, 70, 20));
+        Map<String, Integer> degreeByRoom = new java.util.HashMap<>();
+        layout.rooms().forEach(room -> degreeByRoom.put(room.id(), 0));
+        layout.connections().forEach(edge -> {
+            degreeByRoom.compute(edge.fromRoomId(), (id, degree) -> degree + 1);
+            degreeByRoom.compute(edge.toRoomId(), (id, degree) -> degree + 1);
+        });
+
+        assertEquals(1, layout.rooms().stream()
+                .filter(room -> room.type() == RoomType.START).count());
+        for (RoomNode room : layout.rooms()) {
+            if (room.type() == RoomType.START) {
+                continue;
+            }
+            RoomType expected = switch (degreeByRoom.get(room.id())) {
+                case 0, 1 -> RoomType.DEAD_END;
+                case 2 -> RoomType.CORRIDOR;
+                default -> RoomType.JUNCTION;
+            };
+            assertEquals(expected, room.type(), "Incorrect topology role for " + room.id());
         }
     }
 
