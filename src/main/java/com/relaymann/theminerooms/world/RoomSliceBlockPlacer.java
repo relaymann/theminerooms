@@ -83,12 +83,12 @@ public final class RoomSliceBlockPlacer {
                     level.setBlock(cursor, interiorState, 2);
                 }
 
-                if (!RoomSliceGeometry.isRoomBoundaryPosition(slice, localX, localZ)) {
+                if (!RoomSliceGeometry.RoomSliceGeometry.isRoomBoundaryPosition(slice, localX, localZ)) {
                     continue;
                 }
 
                 for (int localY = 1; localY < ROOM_HEIGHT - 1; localY++) {
-                    if (RoomSliceGeometry.isDoorwayPosition(slice, localX, localY, localZ)) {
+                    if (RoomSliceGeometry.RoomSliceGeometry.isDoorwayPosition(slice, localX, localY, localZ)) {
                         continue;
                     }
                     cursor.set(baseX + localX, floorY + localY, baseZ + localZ);
