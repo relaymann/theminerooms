@@ -47,6 +47,23 @@ class ChunkSlicePlannerTest {
         assertEquals(planner.plan(1, 0), planner.plan(1, 0));
     }
 
+
+    @Test
+    void supportsNegativeWorldCoordinatesWhenAnOriginIsProvided() {
+        ChunkSlicePlanner planner = new ChunkSlicePlanner(twoRoomLayout(), -4, -2);
+
+        RoomChunkSlice west = planner.plan(-4, -2).roomSlice().orElseThrow();
+        RoomChunkSlice east = planner.plan(-2, -2).roomSlice().orElseThrow();
+
+        assertEquals("west", west.roomId());
+        assertEquals(0, west.localChunkX());
+        assertEquals("east", east.roomId());
+        assertEquals(0, east.localChunkX());
+        assertTrue(east.openings().stream()
+                .anyMatch(opening -> opening.direction() == RoomDirection.WEST));
+        assertFalse(planner.plan(-5, -2).isInsideLevel());
+    }
+
     private static LevelLayout twoRoomLayout() {
         return new LevelLayout(10L, 2, 1,
                 List.of(
