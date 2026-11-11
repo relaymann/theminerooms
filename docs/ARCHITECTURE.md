@@ -25,7 +25,7 @@ Every released level must pass `LevelDataValidator`: one or two sourced entrance
 
 ## World generation
 
-The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. A randomized frontier creates a spanning backbone; optional adjacent edges add loops. The layout validator requires exactly rooms minus one backbone edges, a connected backbone, cardinally adjacent connections, unique positions/IDs, and bounded dimensions.
+The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. A randomized frontier creates a spanning backbone; optional adjacent edges add loops. After all edges are finalized, non-start rooms are classified by final graph degree as dead ends (degree 1), corridors (degree 2), or junctions (degree 3+). These semantic roles let later palette/template systems distinguish room shapes without changing connectivity or inventing lore landmarks. The layout validator requires exactly rooms minus one backbone edges, a connected backbone, cardinally adjacent connections, unique positions/IDs, and bounded dimensions.
 
 Each room occupies a 32x32-block footprint (2x2 Minecraft chunks). `ChunkSlicePlanner` converts one requested chunk coordinate into a small immutable slice description in constant time after its indexes are built. Doorway metadata is emitted only by the chunk that owns that room boundary. Chunks outside the generated footprint produce no work. The planner accepts an explicit world-chunk origin for grid position (0, 0), so bounded layouts can be placed across negative and positive world coordinates without changing their deterministic topology.
 
