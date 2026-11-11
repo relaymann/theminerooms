@@ -58,10 +58,11 @@ public final class RoomSliceBlockPlacer {
             return false;
         }
 
-        int ceilingY = floorY + ROOM_HEIGHT - 1;
-        if (floorY < level.getMinBuildHeight() || ceilingY >= level.getMaxBuildHeight()) {
+        long ceilingYLong = (long) floorY + ROOM_HEIGHT - 1;
+        if (floorY < level.getMinBuildHeight() || ceilingYLong >= level.getMaxBuildHeight()) {
             return false;
         }
+        int ceilingY = (int) ceilingYLong;
 
         int baseX = plan.chunkX() * 16;
         int baseZ = plan.chunkZ() * 16;
