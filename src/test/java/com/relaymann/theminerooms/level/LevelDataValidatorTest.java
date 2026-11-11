@@ -55,7 +55,8 @@ class LevelDataValidatorTest {
   assertTrue(LevelDataValidator.validate(java.util.Arrays.asList((LevelDefinition) null)).stream()
    .anyMatch(issue -> issue.contains("null entries")));
  }
-\n private static LevelConnection connection(String id, ConnectionKind kind, ConnectionTargetType targetType, String targetId) {
+
+ private static LevelConnection connection(String id, ConnectionKind kind, ConnectionTargetType targetType, String targetId) {
   return new LevelConnection(id, kind, targetType, targetId, DiscoveryMethod.NATURAL, ConnectionRarity.UNKNOWN,
    "Test-only condition; replace with reviewed source wording.", SOURCE_A, "Test fixture only; not shipped lore data.");
  }
