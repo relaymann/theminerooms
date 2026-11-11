@@ -64,8 +64,13 @@ public final class RoomSliceBlockPlacer {
         }
         int ceilingY = (int) ceilingYLong;
 
-        int baseX = plan.chunkX() * 16;
-        int baseZ = plan.chunkZ() * 16;
+        long baseXLong = (long) plan.chunkX() * ChunkSlicePlanner.CHUNK_SIZE;
+        long baseZLong = (long) plan.chunkZ() * ChunkSlicePlanner.CHUNK_SIZE;
+        if (!isBlockRangeRepresentable(baseXLong, baseZLong)) {
+            return false;
+        }
+        int baseX = (int) baseXLong;
+        int baseZ = (int) baseZLong;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
         for (int localX = 0; localX < 16; localX++) {
@@ -95,6 +100,12 @@ public final class RoomSliceBlockPlacer {
             }
         }
         return true;
+    }
+
+    static boolean isBlockRangeRepresentable(long baseX, long baseZ) {
+        return baseX >= Integer.MIN_VALUE && baseZ >= Integer.MIN_VALUE
+                && baseX + ChunkSlicePlanner.CHUNK_SIZE - 1L <= Integer.MAX_VALUE
+                && baseZ + ChunkSlicePlanner.CHUNK_SIZE - 1L <= Integer.MAX_VALUE;
     }
 
     static boolean isRoomBoundaryPosition(RoomChunkSlice slice, int x, int z) {
