@@ -8,14 +8,15 @@ This is a staged plan, not a claim that features are already implemented.
 - [x] Typed level and connection model.
 - [x] Source and connection-count validation.
 - [x] CI build and unit-test workflow.
-- [ ] Confirm clean CI build on first pushed revision.
+- [x] Confirm clean CI builds for foundation and room topology revisions.
 - [ ] Add reviewed, source-backed initial level records.
 
 ## World and transitions
 - [x] Deterministic bounded room-topology generator (pure Java graph layer).
+- [x] Chunk-to-room slice planning and boundary-specific doorway metadata.
 - [ ] Authored landmark template placement.
 - [ ] Data-driven dimension and level bootstrap.
-- [ ] Chunk-local room and corridor realization.
+- [ ] Minecraft chunk-local room and corridor block realization.
 - [ ] Transition placement from validated connection data.
 - [ ] Safe multiplayer-aware level transfer.
 

@@ -37,23 +37,34 @@ public record LevelLayout(long seed, int width, int depth,
         }
 
         Set<String> edgeKeys = new HashSet<>();
-        Map<String, Set<String>> adjacency = new HashMap<>();
-        byId.keySet().forEach(id -> adjacency.put(id, new HashSet<>()));
+        Map<String, Set<String>> backbone = new HashMap<>();
+        byId.keySet().forEach(id -> backbone.put(id, new HashSet<>()));
+        int backboneEdges = 0;
         for (RoomConnection connection : connections) {
-            if (!byId.containsKey(connection.fromRoomId()) || !byId.containsKey(connection.toRoomId())) {
+            RoomNode from = byId.get(connection.fromRoomId());
+            RoomNode to = byId.get(connection.toRoomId());
+            if (from == null || to == null) {
                 throw new IllegalArgumentException("Connection references an unknown room");
             }
             if (!edgeKeys.add(connection.undirectedKey())) {
                 throw new IllegalArgumentException("Duplicate room connection: " + connection.undirectedKey());
             }
-            adjacency.get(connection.fromRoomId()).add(connection.toRoomId());
-            adjacency.get(connection.toRoomId()).add(connection.fromRoomId());
+            int distance = Math.abs(from.position().x() - to.position().x())
+                    + Math.abs(from.position().z() - to.position().z());
+            if (distance != 1) {
+                throw new IllegalArgumentException("Connected rooms must be cardinally adjacent");
+            }
+            if (connection.type() == RoomConnectionType.BACKBONE) {
+                backboneEdges++;
+                backbone.get(from.id()).add(to.id());
+                backbone.get(to.id()).add(from.id());
+            }
         }
-        if (rooms.size() > 1 && connections.size() < rooms.size() - 1) {
-            throw new IllegalArgumentException("A multi-room layout needs a connected backbone");
+        if (backboneEdges != rooms.size() - 1) {
+            throw new IllegalArgumentException("The backbone must contain exactly rooms - 1 edges");
         }
-        if (!isConnected(rooms.getFirst().id(), adjacency, rooms.size())) {
-            throw new IllegalArgumentException("Room graph is disconnected");
+        if (!isConnected(rooms.getFirst().id(), backbone, rooms.size())) {
+            throw new IllegalArgumentException("The backbone must connect every room");
         }
     }
 

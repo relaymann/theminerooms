@@ -7,7 +7,7 @@ Separate data/catalog, world integration, gameplay systems, and client presentat
 ## Planned modules
 
 - **level** — immutable metadata, sourced connections, catalog, validation.
-- **world** — deterministic room topology, dimension data, level-specific chunk generation, structures, transitions.
+- **world** — deterministic room topology, chunk-slice planning, dimension data, level-specific chunk generation, structures, transitions.
 - **entity** — entity types, sensors, navigation, behavior goals.
 - **psychology** — server-authoritative sanity/fear state; clients render synchronized snapshots.
 - **survival** — items, resources, hazards, status effects.
@@ -25,9 +25,11 @@ Every released level must pass `LevelDataValidator`: one or two sourced entrance
 
 ## World generation
 
-The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. It uses a randomized frontier to create a spanning backbone, then adds optional adjacent loops. Identical seed/config pairs produce identical layouts.
+The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. A randomized frontier creates a spanning backbone; optional adjacent edges add loops. The layout validator requires exactly rooms minus one backbone edges, a connected backbone, cardinally adjacent connections, unique positions/IDs, and bounded dimensions.
 
-This layer is intentionally independent of Minecraft blocks and chunks. The next integration layer will map room nodes to authored templates or procedural room palettes and realize only the chunks requested by Minecraft. Documented transitions are attached later from validated level connection data; the topology generator never invents lore entrances or exits.
+Each room occupies a 32x32-block footprint (2x2 Minecraft chunks). `ChunkSlicePlanner` converts one requested chunk coordinate into a small immutable slice description in constant time after its indexes are built. Doorway metadata is emitted only by the chunk that owns that room boundary. Chunks outside the generated footprint produce no work. Negative chunk coordinates are safely outside this first bounded layout model.
+
+The planner does not load chunks, place blocks, register a dimension, or invent lore transitions. The next integration step will realize each returned slice using level-specific palettes/templates through Minecraft's chunk-generation lifecycle. Documented transitions are attached only from validated level connection data.
 
 Generation limits are enforced before allocation (maximum 128 cells per side and 4,096 grid cells). Avoid whole-level synchronous block generation, distant-chunk searches, and unbounded structure scans.
 
