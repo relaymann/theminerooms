@@ -103,40 +103,14 @@ public final class RoomSliceBlockPlacer {
     }
 
     static boolean isBlockRangeRepresentable(long baseX, long baseZ) {
-        return baseX >= Integer.MIN_VALUE && baseZ >= Integer.MIN_VALUE
-                && baseX + ChunkSlicePlanner.CHUNK_SIZE - 1L <= Integer.MAX_VALUE
-                && baseZ + ChunkSlicePlanner.CHUNK_SIZE - 1L <= Integer.MAX_VALUE;
+        return RoomSliceGeometry.isBlockRangeRepresentable(baseX, baseZ);
     }
 
     static boolean isRoomBoundaryPosition(RoomChunkSlice slice, int x, int z) {
-        return (slice.localChunkZ() == 0 && z == 0)
-                || (slice.localChunkX() == 1 && x == 15)
-                || (slice.localChunkZ() == 1 && z == 15)
-                || (slice.localChunkX() == 0 && x == 0);
+        return RoomSliceGeometry.isRoomBoundaryPosition(slice, x, z);
     }
 
     static boolean isDoorwayPosition(RoomChunkSlice slice, int x, int y, int z) {
-        if (y < 1 || y > DOORWAY_HEIGHT) {
-            return false;
-        }
-
-        int roomLocalX = slice.localChunkX() * 16 + x;
-        int roomLocalZ = slice.localChunkZ() * 16 + z;
-        for (RoomOpening opening : slice.openings()) {
-            boolean insideDoorway = switch (opening.direction()) {
-                case NORTH -> z == 0 && isCentered(roomLocalX);
-                case EAST -> x == 15 && isCentered(roomLocalZ);
-                case SOUTH -> z == 15 && isCentered(roomLocalX);
-                case WEST -> x == 0 && isCentered(roomLocalZ);
-            };
-            if (insideDoorway) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isCentered(int coordinate) {
-        return coordinate >= DOORWAY_START && coordinate < DOORWAY_START + DOORWAY_WIDTH;
+        return RoomSliceGeometry.isDoorwayPosition(slice, x, y, z);
     }
 }
