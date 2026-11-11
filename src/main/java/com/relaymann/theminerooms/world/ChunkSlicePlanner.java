@@ -15,9 +15,19 @@ public final class ChunkSlicePlanner {
     public static final int ROOM_SIZE_IN_CHUNKS = 2;
 
     private final Map<GridPosition, RoomNode> roomsByPosition;
+    private final int originChunkX;
+    private final int originChunkZ;
     private final Map<String, List<RoomOpening>> openingsByRoomId;
 
     public ChunkSlicePlanner(LevelLayout layout) {
+        this(layout, 0, 0);
+    }
+
+    /**
+     * Creates a planner whose grid position (0, 0) begins at the supplied world chunk.
+     * This allows bounded layouts to be centered around negative or positive world coordinates.
+     */
+    public ChunkSlicePlanner(LevelLayout layout, int originChunkX, int originChunkZ) {
         if (layout == null) {
             throw new IllegalArgumentException("layout must not be null");
         }
@@ -40,21 +50,25 @@ public final class ChunkSlicePlanner {
         }
 
         this.roomsByPosition = Map.copyOf(rooms);
+        this.originChunkX = originChunkX;
+        this.originChunkZ = originChunkZ;
         Map<String, List<RoomOpening>> immutableOpenings = new HashMap<>();
         openings.forEach((id, values) -> immutableOpenings.put(id, List.copyOf(values)));
         this.openingsByRoomId = Map.copyOf(immutableOpenings);
     }
 
     public ChunkWorkPlan plan(int chunkX, int chunkZ) {
-        int roomX = Math.floorDiv(chunkX, ROOM_SIZE_IN_CHUNKS);
-        int roomZ = Math.floorDiv(chunkZ, ROOM_SIZE_IN_CHUNKS);
-        if (roomX < 0 || roomZ < 0) {
+        long relativeChunkX = (long) chunkX - originChunkX;
+        long relativeChunkZ = (long) chunkZ - originChunkZ;
+        long roomX = Math.floorDiv(relativeChunkX, ROOM_SIZE_IN_CHUNKS);
+        long roomZ = Math.floorDiv(relativeChunkZ, ROOM_SIZE_IN_CHUNKS);
+        if (roomX < 0 || roomZ < 0 || roomX > Integer.MAX_VALUE || roomZ > Integer.MAX_VALUE) {
             return new ChunkWorkPlan(chunkX, chunkZ, Optional.empty());
         }
 
-        int localX = Math.floorMod(chunkX, ROOM_SIZE_IN_CHUNKS);
-        int localZ = Math.floorMod(chunkZ, ROOM_SIZE_IN_CHUNKS);
-        RoomNode room = roomsByPosition.get(new GridPosition(roomX, roomZ));
+        int localX = (int) Math.floorMod(relativeChunkX, ROOM_SIZE_IN_CHUNKS);
+        int localZ = (int) Math.floorMod(relativeChunkZ, ROOM_SIZE_IN_CHUNKS);
+        RoomNode room = roomsByPosition.get(new GridPosition((int) roomX, (int) roomZ));
         if (room == null) {
             return new ChunkWorkPlan(chunkX, chunkZ, Optional.empty());
         }
