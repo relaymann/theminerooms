@@ -18,9 +18,6 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class RoomSliceBlockPlacer {
     public static final int ROOM_HEIGHT = 8;
-    public static final int DOORWAY_WIDTH = 3;
-    public static final int DOORWAY_HEIGHT = 3;
-    private static final int DOORWAY_START = (32 - DOORWAY_WIDTH) / 2;
 
     private RoomSliceBlockPlacer() {
     }
@@ -66,7 +63,7 @@ public final class RoomSliceBlockPlacer {
 
         long baseXLong = (long) plan.chunkX() * ChunkSlicePlanner.CHUNK_SIZE;
         long baseZLong = (long) plan.chunkZ() * ChunkSlicePlanner.CHUNK_SIZE;
-        if (!isBlockRangeRepresentable(baseXLong, baseZLong)) {
+        if (!RoomSliceGeometry.isBlockRangeRepresentable(baseXLong, baseZLong)) {
             return false;
         }
         int baseX = (int) baseXLong;
@@ -102,15 +99,5 @@ public final class RoomSliceBlockPlacer {
         return true;
     }
 
-    static boolean isBlockRangeRepresentable(long baseX, long baseZ) {
-        return RoomSliceGeometry.isBlockRangeRepresentable(baseX, baseZ);
-    }
 
-    static boolean isRoomBoundaryPosition(RoomChunkSlice slice, int x, int z) {
-        return RoomSliceGeometry.isRoomBoundaryPosition(slice, x, z);
-    }
-
-    static boolean isDoorwayPosition(RoomChunkSlice slice, int x, int y, int z) {
-        return RoomSliceGeometry.isDoorwayPosition(slice, x, y, z);
-    }
 }
