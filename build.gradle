@@ -1,0 +1,23 @@
+plugins { id 'java'; id 'net.neoforged.moddev' version '2.0.78' }
+group = mod_group_id
+version = mod_version
+base { archivesName = mod_id }
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+sourceSets.main.resources.srcDir 'src/generated/resources'
+repositories { mavenCentral() }
+neoForge {
+ version = neo_version
+ runs {
+  client { client(); systemProperty 'neoforge.enabledGameTestNamespaces', mod_id }
+  server { server(); programArgument '--nogui'; systemProperty 'neoforge.enabledGameTestNamespaces', mod_id }
+ }
+ mods { theminerooms { sourceSet sourceSets.main } }
+}
+dependencies { testImplementation platform('org.junit:junit-bom:5.11.4'); testImplementation 'org.junit.jupiter:junit-jupiter' }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+processResources {
+ def replaceProperties = [mod_id: mod_id, mod_name: mod_name, mod_version: mod_version, mod_authors: mod_authors, minecraft_version: minecraft_version, neo_version: neo_version]
+ inputs.properties replaceProperties
+ filesMatching('META-INF/neoforge.mods.toml') { expand replaceProperties }
+}
+test { useJUnitPlatform(); testLogging { events 'failed', 'skipped' } }
