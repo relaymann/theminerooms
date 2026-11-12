@@ -1,5 +1,4 @@
 # Roadmap
-
 This is a staged plan, not a claim that features are already implemented.
 
 ## Foundation
@@ -16,9 +15,10 @@ This is a staged plan, not a claim that features are already implemented.
 - [x] Chunk-to-room slice planning and boundary-specific doorway metadata.
 - [x] Deterministic room-template selection with graph-derived doorway preservation.
 - [x] Validated room material palettes and complete per-level room build planning.
-- [ ] Authored structure assets and NBT loading.
+- [x] Bounded interior decoration assets and chunk-local slicing.
+- [ ] Authored structure assets and resource loading.
 - [ ] Data-driven dimension and level bootstrap.
-- [ ] Minecraft chunk-local room and corridor block realization.
+- [ ] Minecraft chunk-local room and decoration block realization.
 - [ ] Transition placement from validated connection data.
 - [ ] Safe multiplayer-aware level transfer.
 
