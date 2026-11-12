@@ -54,12 +54,52 @@ class RoomTemplateSelectorTest {
     void rejectsDuplicateTemplateIdsAndUnknownRooms() {
         RoomTemplate duplicateA = new RoomTemplate("same", Set.of(RoomType.CORRIDOR), Set.of());
         RoomTemplate duplicateB = new RoomTemplate("same", Set.of(RoomType.CORRIDOR), Set.of());
-        RoomNode room = new RoomNode("corridor", new GridPosition(0, 0), RoomType.CORRIDOR);
-
         assertThrows(IllegalArgumentException.class, () -> selector.select(
-                1L, room, Set.of(), List.of(duplicateA, duplicateB)));
+                1L, new RoomNode("corridor", new GridPosition(0, 0), RoomType.CORRIDOR),
+                Set.of(), List.of(duplicateA, duplicateB)));
         assertThrows(IllegalArgumentException.class,
                 () -> selector.select(threeRoomLine(), "not_a_room", List.of(duplicateA)));
+    }
+
+    @Test
+    void batchSelectionCoversEveryRoomAndIsStable() {
+        LevelLayout layout = threeRoomLine();
+        List<RoomTemplate> templates = List.of(
+                new RoomTemplate("start", Set.of(RoomType.START), Set.of(RoomDirection.EAST)),
+                new RoomTemplate("corridor", Set.of(RoomType.CORRIDOR),
+                        Set.of(RoomDirection.WEST, RoomDirection.EAST)),
+                new RoomTemplate("dead_end", Set.of(RoomType.DEAD_END), Set.of(RoomDirection.WEST)));
+
+        var first = selector.selectAll(layout, templates);
+        var second = selector.selectAll(layout, List.of(templates.get(2), templates.get(0), templates.get(1)));
+
+        assertEquals(first, second);
+        assertEquals(Set.of("start", "middle", "end"), first.keySet());
+    }
+
+    @Test
+    void batchSelectionPreservesLoopOpeningsAsWellAsBackboneOpenings() {
+        List<RoomNode> rooms = List.of(
+                new RoomNode("a", new GridPosition(0, 0), RoomType.CORRIDOR),
+                new RoomNode("b", new GridPosition(1, 0), RoomType.CORRIDOR),
+                new RoomNode("c", new GridPosition(0, 1), RoomType.CORRIDOR),
+                new RoomNode("d", new GridPosition(1, 1), RoomType.CORRIDOR));
+        List<RoomConnection> edges = List.of(
+                new RoomConnection("a", "b", RoomConnectionType.BACKBONE),
+                new RoomConnection("a", "c", RoomConnectionType.BACKBONE),
+                new RoomConnection("b", "d", RoomConnectionType.BACKBONE),
+                new RoomConnection("c", "d", RoomConnectionType.LOOP));
+        LevelLayout square = new LevelLayout(99L, 2, 2, rooms, edges);
+        RoomTemplate junction = new RoomTemplate("corridor_all_sides", Set.of(RoomType.CORRIDOR),
+                Set.of(RoomDirection.NORTH, RoomDirection.EAST, RoomDirection.SOUTH, RoomDirection.WEST));
+
+        var assignments = selector.selectAll(square, List.of(junction));
+
+        assertEquals("corridor_all_sides", assignments.get("a").id());
+        RoomTemplate missingLoopOpening = new RoomTemplate("north_only", Set.of(RoomType.CORRIDOR),
+                Set.of(RoomDirection.NORTH));
+        assertThrows(IllegalArgumentException.class,
+                () -> selector.select(square, "c", List.of(missingLoopOpening)));
     }
 
     private static LevelLayout threeRoomLine() {

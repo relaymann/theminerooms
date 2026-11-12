@@ -5,12 +5,17 @@ import java.util.Set;
 
 /**
  * Metadata for an authored 32x32-block room template.
- *
- * This is deliberately independent of Minecraft block states and structure loading.
- * The opening set declares every doorway the template can physically support.
+ * Structure loading is intentionally kept outside this pure-Java model.
  */
-public record RoomTemplate(String id, Set<RoomType> supportedRoomTypes,
+public record RoomTemplate(String id, String paletteId,
+                           Set<RoomType> supportedRoomTypes,
                            Set<RoomDirection> openings) {
+    /** Compatibility constructor for templates that use the default palette. */
+    public RoomTemplate(String id, Set<RoomType> supportedRoomTypes,
+                        Set<RoomDirection> openings) {
+        this(id, "default", supportedRoomTypes, openings);
+    }
+
     public RoomTemplate {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Template id must not be blank");
@@ -20,15 +25,20 @@ public record RoomTemplate(String id, Set<RoomType> supportedRoomTypes,
             throw new IllegalArgumentException(
                     "Template id must use lowercase letters, digits, '.', '_' or '-'");
         }
+        if (paletteId == null || paletteId.isBlank()) {
+            throw new IllegalArgumentException("Template palette id must not be blank");
+        }
+        paletteId = paletteId.trim();
+        if (!paletteId.matches("[a-z0-9_.-]+")) {
+            throw new IllegalArgumentException("Palette id must use lowercase letters, digits, '.', '_' or '-'");
+        }
         supportedRoomTypes = Set.copyOf(
                 Objects.requireNonNull(supportedRoomTypes, "supportedRoomTypes"));
         openings = Set.copyOf(Objects.requireNonNull(openings, "openings"));
         if (supportedRoomTypes.isEmpty()) {
             throw new IllegalArgumentException("A template must support at least one room type");
         }
-        if (supportedRoomTypes.contains(null) || openings.contains(null)) {
-            throw new IllegalArgumentException("Template sets must not contain null values");
-        }
+        // Set.copyOf rejects null elements; do not call immutable Set.contains(null), which throws.
     }
 
     public boolean supports(RoomNode room, Set<RoomDirection> requiredOpenings) {

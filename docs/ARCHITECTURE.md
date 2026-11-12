@@ -7,7 +7,7 @@ Separate data/catalog, world integration, gameplay systems, and client presentat
 ## Planned modules
 
 - **level** — immutable metadata, sourced connections, catalog, validation.
-- **world** — deterministic room topology, chunk-slice planning, dimension data, level-specific chunk generation, structures, transitions.
+- **world** — deterministic room topology, chunk-slice planning, room-template and palette assignment, dimension data, level-specific chunk generation, structures, transitions.
 - **entity** — entity types, sensors, navigation, behavior goals.
 - **psychology** — server-authoritative sanity/fear state; clients render synchronized snapshots.
 - **survival** — items, resources, hazards, status effects.
@@ -25,11 +25,13 @@ Every released level must pass `LevelDataValidator`: one or two sourced entrance
 
 ## World generation
 
-The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. A randomized frontier creates a spanning backbone; optional adjacent edges add loops. After all edges are finalized, non-start rooms are classified by final graph degree as dead ends (degree 1), corridors (degree 2), or junctions (degree 3+). These semantic roles let later palette/template systems distinguish room shapes without changing connectivity or inventing lore landmarks. `RoomTemplate` records the room roles and cardinal openings an authored template can support. `RoomTemplateSelector` derives required openings from the validated graph, filters out templates that would block any connected route, then selects deterministically from the compatible set using the level seed and stable room identifier. Template selection is metadata only; it does not yet load structures or place authored blocks. The layout validator requires exactly rooms minus one backbone edges, a connected backbone, cardinally adjacent connections, unique positions/IDs, and bounded dimensions.
+The topology layer creates an immutable, connected room graph from a seed and a bounded grid configuration. A randomized frontier creates a spanning backbone; optional adjacent edges add loops. After all edges are finalized, non-start rooms are classified by final graph degree as dead ends (degree 1), corridors (degree 2), or junctions (degree 3+). These semantic roles distinguish room shapes without changing connectivity or inventing lore landmarks. The layout validator requires exactly rooms minus one backbone edges, a connected backbone, cardinally adjacent connections, unique positions/IDs, and bounded dimensions.
 
 Each room occupies a 32x32-block footprint (2x2 Minecraft chunks). `ChunkSlicePlanner` converts one requested chunk coordinate into a small immutable slice description in constant time after its indexes are built. Doorway metadata is emitted only by the chunk that owns that room boundary. Chunks outside the generated footprint produce no work. The planner accepts an explicit world-chunk origin for grid position (0, 0), so bounded layouts can be placed across negative and positive world coordinates without changing their deterministic topology.
 
-The planner does not load chunks, place blocks, register a dimension, or invent lore transitions. `RoomSliceBlockPlacer` realizes one slice with caller-supplied floor, wall, ceiling, and interior states; it does not yet have a registered dimension/chunk-generation caller. Invoke it only from the target dimension's generation lifecycle, never from a chunk-load event. Documented transitions are attached only from validated level connection data.
+`RoomTemplate` describes supported room roles, a palette ID, and the cardinal openings an authored template can contain. `RoomTemplateSelector.selectAll` derives all required openings from the final room graph in one pass, filters templates that would seal any route, and makes deterministic assignments from the level seed and stable room IDs. `RoomPalette` stores validated namespaced block identifiers for floor, wall, ceiling, and interior material roles. `RoomGenerationPlanner` validates that every room has a compatible template and palette before returning an immutable `RoomGenerationPlan`; its chunk queries pair the existing slice plan with the room's selected template and palette.
+
+These classes are metadata and planning only. They do not load structure NBT, resolve block states, register a dimension, or write blocks. `RoomSliceBlockPlacer` still accepts caller-supplied block states and has no registered dimension/chunk-generation caller. Integrate it only from the target dimension's generation lifecycle, never from a chunk-load event. Documented transitions are attached only from validated level connection data.
 
 Generation limits are enforced before allocation (maximum 128 cells per side and 4,096 grid cells). Avoid whole-level synchronous block generation, distant-chunk searches, and unbounded structure scans.
 

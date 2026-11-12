@@ -14,8 +14,9 @@ This is a staged plan, not a claim that features are already implemented.
 ## World and transitions
 - [x] Deterministic bounded room-topology generator (pure Java graph layer).
 - [x] Chunk-to-room slice planning and boundary-specific doorway metadata.
-- [x] Deterministic room-template metadata selection with doorway-preservation checks.
-- [ ] Authored landmark template placement.
+- [x] Deterministic room-template selection with graph-derived doorway preservation.
+- [x] Validated room material palettes and complete per-level room build planning.
+- [ ] Authored structure assets and NBT loading.
 - [ ] Data-driven dimension and level bootstrap.
 - [ ] Minecraft chunk-local room and corridor block realization.
 - [ ] Transition placement from validated connection data.
