@@ -16,9 +16,10 @@ This is a staged plan, not a claim that features are already implemented.
 - [x] Deterministic room-template selection with graph-derived doorway preservation.
 - [x] Validated room material palettes and complete per-level room build planning.
 - [x] Bounded interior decoration assets and chunk-local slicing.
-- [ ] Authored structure assets and resource loading.
+- [x] Chunk-local decoration block-placement adapter with injected block-state resolution.
+- [ ] Resource loading for authored room and decoration assets.
 - [ ] Data-driven dimension and level bootstrap.
-- [ ] Minecraft chunk-local room and decoration block realization.
+- [ ] Invoke room and decoration placement from the registered chunk-generation pipeline.
 - [ ] Transition placement from validated connection data.
 - [ ] Safe multiplayer-aware level transfer.
 
